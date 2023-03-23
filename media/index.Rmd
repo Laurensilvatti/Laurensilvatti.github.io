@@ -6,14 +6,7 @@ output: html_document
 knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE)
 ```
 
-
-Here is my Website.
-
-```{r}
-dir.create("about_me")
-```
-
-```{r}
-dir.create("media")
+```{r,out.height=600,out.width=800}
+knitr::include_graphics("../../../Desktop/Data_Course_GUERREROSILVA/little_thing.jpeg")
 ```
 
