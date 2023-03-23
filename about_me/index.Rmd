@@ -10,4 +10,4 @@ knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE)
 
 See, I can make **bold text** 
 
-here is [my cv](http://Laurensilvatti.github.oi/about_me/Lauren_CV.pdf)
+here is [my cv](http://Laurensilvatti.github.io/about_me/Lauren_CV.pdf)
