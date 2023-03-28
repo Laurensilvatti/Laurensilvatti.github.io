@@ -1,0 +1,19 @@
+---
+output: html_document
+---
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE)
+```
+
+
+### Hi, my name is Lauren. I currently live un Utah. I attend UVU
+
+See, I can make **bold text** 
+
+``` {r}
+knitr::include_graphics("./Media/IMG_7201.jpeg")
+```
+
+
+here is [my cv](http://Laurensilvatti.github.io/about_me/Lauren_CV.pdf)
+
