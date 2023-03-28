@@ -8,12 +8,12 @@ knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE)
 
 ### Hi, my name is Lauren. 
 ```{r,out.length=500,out.width=400}
-knitr::include_graphics("./media/IMG_7201.jpeg")
+knitr::include_graphics("../media/IMG_7201.jpeg")
 ```
 
 
 See, I can make **bold text** 
 
-here is [my cv](http://Laurensilvatti.github.io/about_me/media/Lauren_CV.pdf)
+here is [my cv](http://Laurensilvatti.github.io/media/Lauren_CV.pdf)
 
 
