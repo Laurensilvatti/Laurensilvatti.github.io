@@ -1,0 +1,25 @@
+﻿Mouse_ID,Type,Sex,Sniffing ,Mounting,Grooming,No_contact,Duration(min),Freq_S,Freq_M,Freq_G
+M_001,WT,Male,yes,no,no,no ,30.00,4,0,0
+M_002,WT,Male,yes,no,no,no ,30.00,5,0,0
+M_003,Het,Male,yes,no,yes,no ,30.00,4,0,1
+M_004,Homo,Male,no,no,no,yes,30.00,0,0,0
+M_005,Het,Male,yes,no,no,no ,30.00,2,0,0
+M_006,Het,Male,yes,no,yes,no ,30.00,2,0,0
+M_007,Homo,Male,yes,no,no,no ,30.00,1,0,0
+M_008,WT,Male,yes,yes,yes,no ,30.00,6,1,2
+M_009,WT,Male,yes,no,yes,no ,30.00,5,0,3
+M_010,Homo,Male,no,no,no,yes,30.00,0,0,0
+M_011,Homo,Male,yes,no,no,no ,30.00,3,0,0
+M_012,WT,Male,yes,yes,yes,no ,30.00,6,1,4
+F_001,homo,Female,yes,,yes,no ,30.00,3,,1
+F_002,Het,Female,yes,,no,no ,30.00,2,,0
+F_003,Het,Female,no,,no,yes,30.00,0,,0
+F_004,Het,Female,no,,no,yes,30.00,0,,0
+F_005,WT,Female,yes,,no,no ,30.00,2,,0
+F_006,Homo,Female,no,,no,yes,30.00,0,,0
+F_007,WT,Female,yes,,yes,no ,30.00,4,,2
+F_008,WT,Female,yes,,no,no ,30.00,3,,0
+F_009,WT,Female,yes,,no,no ,30.00,3,,0
+F_010,WT,Female,no,,no,yes,30.00,0,,0
+F_011,Homo,Female,no,,no,yes,30.00,0,,0
+F_012,Homo,Female,yes,,yes,no ,30.00,3,,1

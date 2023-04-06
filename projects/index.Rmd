@@ -1,9 +1,22 @@
 ---
-output: html_document
+output: 
+  html_document:
+    toc: yes
+    toc_float:
+      collapsed: false
+pagetitle: MyReportOnMiseBehavior
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE)
+library(tidyverse)
+library(easystats)
+library(plotly)
+library(kableExtra)
+library(janitor)
+library(patchwork)
+library(readxl)
+theme_set(theme_minimal())
 
 ```
 
@@ -12,12 +25,8 @@ knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE)
 ### Data Analysis Course - Utah Valley University - Lauren Guerrero Silva
 ___
 
-During these past 3 months I have been learning basic skills in R to further analize scientific data.
-One of our assignments consisted of creating a Final project where we would show all skills learned
-to analyze real data for our own specific projects.
-
 I am currently working with mice to determine whether or not their Pomc mutation has any effect
-on their sexual behaviour.
+on their sexual behavior.
 Proopiomelanocortin (Pomc) is a polypeptide found primarily in the arcuate nucleus (ARC) of the hypothalamus. 
 The Pomc-allele synthesizes several products. The combination of resultant peptides makes Pomc a powerful influence
 on overall health, particularly in relation to body size and fertility. A mutation at the nPE1 site of the Pomc 
@@ -27,3 +36,89 @@ Many of these effects are apparent on a mouse model. The goal is to create a mou
 the cause for the observed infertility experienced by Pomc-deficient individuals, specifically evaluating the differences 
 between wild-type (control) mice and affected POMC-deficient (mutant) mice in sexual behavior: libido, 
 adherance to copulatory norms, and ultrasonic communication.
+
+Here is a look at the raw data I worked with.
+
+# Raw Data
+
+
+```{r}
+df <- read_excel("../media/Mouse_trials_data.xlsx") %>% 
+  clean_names() %>% 
+  mutate(type=str_to_upper(type))
+
+df %>% 
+  kable() %>% 
+  kable_classic(lightable_options = 'hover') %>% 
+  scroll_box(height = '200px')
+
+```
+
+This data set is of Male and Female mice, and the presence or not of certain sexual behaviors and their respective frequencies during a set period of time. Our goal is to see if we can build a model that uses these measures to predict sexual behavior in Pomc deficient mice.
+
+___
+
+# Cleaning
+
+In order to properly analyze this data I have to do a few data tidying tasks first
+
+```{r echo=TRUE}
+df <- df %>% 
+  pivot_longer(cols = c(mounting,sniffing,no_contact,grooming),
+               values_to = "present",
+               names_to = "behavior")
+
+frq <- df %>% 
+  select(starts_with("freq_"), mouse_id)
+frq <- frq %>% 
+  pivot_longer(cols = starts_with("freq_"),
+               values_to = "frequency",
+               names_to = "behavior",
+               names_prefix = "freq_") %>% 
+    mutate(behavior = case_when(behavior == "s" ~ "sniffing",     
+                            behavior == "g" ~ "grooming",
+                            behavior == "m" ~ "mounting")) 
+frq <- frq %>% 
+  distinct(mouse_id, behavior, .keep_all = TRUE)
+
+df <- df %>% 
+    select(-starts_with("freq_"))
+
+clean <- 
+  df %>% 
+  full_join(frq)
+clean <- clean %>% 
+  mutate(present = case_when(present == "yes" ~ TRUE,
+                             present == "no" ~ FALSE))
+
+```
+
+Female mice do not present behaviors of mounting... for obvious reasons. Some mice had no contact whatsoever.
+
+This is how the clean data looks like:
+
+```{r}
+clean %>% 
+  kable() %>% 
+  kable_classic(lightable_options = 'hover') %>% 
+  scroll_box(height = '200px')
+```
+
+___
+
+
+# Visualizing
+
+```{r}
+
+clean %>% 
+  ggplot(aes(x=behavior,y=frequency, color=sex, group = sex)) +
+  geom_boxplot() +
+  facet_wrap(~type,scales = 'free') +
+  labs(y="Frequency",x="Behavior",title = "Frequeincy of behavior")+
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 90,
+                                   vjust = .5)) 
+
+```
+
