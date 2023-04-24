@@ -8,7 +8,16 @@ knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE)
 ```
 
 
-Here is my Website.
+# Hello and welcome to my website!
 
-## [About Me](https://laurensilvatti.github.io/about_me/)  |  [Projects](https://laurensilvatti.github.io/projects/) 
+This is the online space where you can get to know me, my work, and my passions. I am thrilled that you are here and hope that you will find this website informative.
 
+## [About Me](https://laurensilvatti.github.io/about_me/)  | [Curriculum Vitae](https://laurensilvatti.github.io/CV/) | [Projects](https://laurensilvatti.github.io/projects/) | [Conferences](https://laurensilvatti.github.io/conferences/)
+
+As a woman who is passionate about science and traveling I am excited to share my journey with you. Through this website, I hope to provide insights into my background, skills, and achievements, as well as highlight some of the projects and experiences that have shaped my career.
+
+Whether you are an employer looking to learn more about my qualifications or simply someone interested in learning more about me and what I do, I hope you will find this website to be a valuable resource. Thank you for taking the time to visit and please feel free to contact me if you have any questions or comments.
+
+```{r,out.length=500,out.width=400}
+knitr::include_graphics("./media/IMG_0381.jpeg")
+```   

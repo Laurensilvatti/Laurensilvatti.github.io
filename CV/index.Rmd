@@ -1,0 +1,15 @@
+---
+output: html_document
+---
+
+## Take a look at my [CV](http://Laurensilvatti.github.io/media/Lauren_CV.pdf)
+
+```{r, echo=FALSE, out.width="100%", out.height= "1000px"}
+# Use include_graphics() to insert the PDF file
+#knitr::include_graphics("../CV/Lauren_CV.pdf")
+```
+
+
+
+
+
