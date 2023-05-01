@@ -7,14 +7,13 @@ output:
 pagetitle: MyReportOnMiseBehavior
 ---
 
+
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE)
 library(tidyverse)
 library(easystats)
-library(plotly)
 library(kableExtra)
 library(janitor)
-library(patchwork)
 library(readxl)
 library(hms) 
 library(dplyr)
@@ -52,19 +51,22 @@ df %>%
   kable() %>% 
   kable_classic(lightable_options = 'hover') %>% 
   scroll_box(height = '200px')
-
 ```
 
-This data set is of Male and Female mice, and the presence of certain sexual behaviors and their respective duration during a set period of time. Our goal is to see if we can build a model that uses these measures to predict sexual behavior in Pomc deficient mice.
+
+#
+The present data set includes information on male and female mice, comprising their respective genetic make-up (homozygous, heterozygous, or wild-type) and the duration of specific sexual behaviors exhibited over a 30 minute time interval. This research objectives encompass the comprehensive analysis of this data set to ascertain whether significant differences in sexual behavior among mice can be attributed to their genetic makeup.
 
 ___
 
 # Cleaning
 
-In order to properly analyze this data I have to do a few data tidying tasks first
 
+Prior to commencing a comprehensive analysis of the data, several data tidying tasks need to be performed.
+
+<button class="btn btn-primary" data-toggle="collapse" data-target="#rCode1">Show/Hide R Code 1</button>
+<div id="rCode1" class="collapse">
 ```{r echo=TRUE}
-
 df$behaviour <- 
   df$behaviour %>% tolower()
 
@@ -110,14 +112,22 @@ clean <- clean %>%
 colnames(clean)
 clean <- clean[, c("trial_number", "mouse_id_number", "mouse_type",
              "sex", "date", "start_time", "end_time",
-             "duration_in_s", "behaviour",  "frequency")]
-
+             "duration_in_s", "behaviour")]
 
 ```
+</div>
 
-Female mice do not present behaviors of mounting... for obvious reasons. 
+#
+The previous R code is part of the data cleaning process. The *df* dataframe, which contains the original data, is first modified by converting all behavior values to lowercase. Then, the *timestamps* column is separated into *start_time* and *end_time* columns, which are subsequently converted from characters to time objects using the **as_hms()** function. A new *duration_in_s* column is created by calculating the difference in seconds between the *start_time* and *end_time* columns.
 
-This is how the clean data looks like:
+Next, the *mouse_id* column is separated into *sex*, *mouse_type*, and *mouse_id_number* columns using the **str_sub()** function. The *mouse_type* values are modified to be more readable, with "WT" representing "Wild type", "HE" representing "Heterozigot", and "HO" representing "Homozigot". Finally, the columns are reordered for better readability.
+
+___ 
+
+
+# Cleaned Data
+
+The resulting clean dataframe will now be presented in a tabular format using the **kableExtra::kable()** function as done with the original data. This chart shows the *trial number*, *mouse ID number*, *mouse type*, *sex*, *date*, *start time*, *end time*, *duration in seconds*, and *behavior*. The table reveals that female mice did not exhibit mounting behavior, which is expected due to their biological differences from male mice.
 
 ```{r}
 clean %>% as.data.frame() %>% 
@@ -129,20 +139,88 @@ clean %>% as.data.frame() %>%
 
 ___
 
+# Visualizing the Data
 
-# Visualizing
+Adding a visual representation of our data frame can be helpful to understand the patterns and relationships within the data more easily. It can also help us identify outliers, trends, and other important features of the data that may not be immediately apparent when looking at the raw numbers.
+This plot shows the duration of behaviors exhibited by male and female mice of different genetic types. The behaviors were filtered to include only those with a duration of less than two minutes to exclude a few outliers found in the dataframe.  The plot shows the distribution of duration in seconds for each behavior using box plots, with the behavior on the x-axis and the duration on the y-axis. The plot is further divided into subplots based on the genetic type of the mice, with the y-axis scales varying between the subplots. The plot suggests that there are differences in the duration of certain behaviors between male and female mice of different genetic types.
 
 ```{r}
-
 clean %>% 
-  filter(duration_in_s < "00:02:00" %>% as.hms()) %>% 
+  filter(between(duration_in_s, as.hms("00:00:00"), as.hms("00:02:00"))) %>% 
   ggplot(aes(x=behaviour,y=duration_in_s, fill=sex)) +
   geom_boxplot() +
-  facet_wrap(~mouse_type,scales = 'free_y') +
+  facet_wrap(~mouse_type, scales = 'free_y') +
   labs(y="Duration",x="Behavior",title = "Durantion of behavior")+
   theme_minimal() +
-  theme(axis.text.x = element_text(angle = 90,
-                                   vjust = .5))
+  theme(axis.text.x = element_text(angle = 90, vjust = .5))
 
 ```
+
+The preceding graph indicates that wild-type male and female mice exhibited a greater frequency of sexual behaviors, while heterozygous and homozygous mice primarily engaged in anogenital sniffing across multiple trials.
+
+___
+
+# Multidimentional Scaling
+
+In order to fully utilize the information in our data set, it becomes necessary to shift gears from traditional linear models to exploratory data analysis techniques that can handle multiple variables. One such technique is dimension reduction, which allows us to identify the most important variables while also reducing the complexity of our data set. In this context, we will be using the metaMDS (multidimensional scaling) ANOVA analysis, which is a powerful and widely-used method that provides a low-dimensional representation of our high-dimensional data set. This analysis is particularly important for our research because it enables us to identify the most important variables that contribute to the variation in our data and to identify patterns and trends that may not be immediately apparent using traditional linear models. Ultimately, this type of analysis can help us gain a deeper understanding of the complex relationships among the variables in our data set, and can provide important insights for further research and analysis.
+
+To begin this process I will create two different data frames. The first data frame will focus on the duration of each behavior by sex and mouse type, while the second data frame will provide information on the frequency of each behavior. This approach will enable us to identify any underlying patterns or trends in our data and facilitate further statistical analyses.
+
+#
+<button class="btn btn-primary" data-toggle="collapse" data-target="#rCode2">Show/Hide R Code 2</button>
+<div id="rCode2" class="collapse">
+```{r echo=TRUE}
+#1. Columns of Mouse type, sex, behavior (each beh get a column) and total time of behavior.
+time <- clean %>%
+  mutate(start_time = as.POSIXct(paste(date, start_time)),
+         end_time = as.POSIXct(paste(date, end_time))) %>%
+  group_by(mouse_id_number, mouse_type, sex) %>%
+  summarize(anogenital_sniffing = sum(difftime(end_time[behaviour == "anogenital sniffing"], 
+                                               start_time[behaviour == "anogenital sniffing"])),
+            pelvic_thrusting = sum(difftime(end_time[behaviour == "pelvic thrusting"], 
+                                            start_time[behaviour == "pelvic thrusting"])),
+            post_intromission_grooming = sum(difftime(end_time[behaviour == "post intromission grooming"], 
+                                                      start_time[behaviour == "post intromission grooming"])),
+            appeared_successful_ejaculation = sum(difftime(end_time[behaviour == "appeared successful ejaculation"], 
+                                                           start_time[behaviour == "appeared successful ejaculation"])),
+            mounting_attempt = sum(difftime(end_time[behaviour == "mounting attempts"], 
+                                            start_time[behaviour == "mounting attempts"])))
+
+time <- time %>% 
+  mutate_at(vars(4:8), ~ as.numeric(gsub(" secs", "", .)))
+
+
+#2. Columns of Mouse Type, Sex, Behavior (each beh get a column) and Frequency of behavior. 
+freq <- clean %>%
+  group_by(mouse_id_number, mouse_type, sex) %>%
+  summarize(anogenital_sniffing = sum(behaviour == "anogenital sniffing"),
+            pelvic_thrusting = sum(behaviour == "pelvic thrusting"),
+            post_intromission_grooming = sum(behaviour == "post intromission grooming"),
+            appeared_successful_ejaculation = sum(behaviour == "appeared successful ejaculation"),
+            mounting_attempt = sum(behaviour == "mounting attempts"))
+
+```
+</div>
+#
+
+Below are the new data frames, respectively containing the total time and frequency of behaviors based on mouse ID number, mouse type and sex.
+
+**Total duration in Seconds of each Behavior**
+```{r}
+time %>% as.data.frame() %>% 
+  kableExtra::kable() %>% 
+  kable_classic(lightable_options = 'hover') %>% 
+  scroll_box(height = '300px')
+```
+#
+**Total Frequency of each Behavior**
+```{r}
+freq %>% as.data.frame() %>% 
+  kableExtra::kable() %>% 
+  kable_classic(lightable_options = 'hover') %>% 
+  scroll_box(height = '300px')
+
+```
+
+
 
