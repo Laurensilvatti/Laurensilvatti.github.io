@@ -254,10 +254,12 @@ freq_stats %>% as.data.frame() %>%
 ```
 
 
+___
+
 # Working with MSD
 
 In the following code, the grouping variables in the time and frequency data frames are first removed, and then specific columns of data are selected and converted into matrices. The **adonis2()** function is then applied to the data to perform a permutation test to determine whether the groups differ significantly. The **metaMDS()** function is used to perform the MDS analysis on the matrices, and the resulting coordinates are used to create a scatter plot with **ggplot2**. The **stat_ellipse()** function is used to add an ellipse around the data points, which makes it visually easier to see the overlap between different mouse types.
-It is was important to utilize MSD analysis because it allows us to gain a deeper understanding of the relationships between the variables and identify any patterns or trends that may not be apparent through other methods. 
+It was important to utilize MSD analysis because it allows us to gain a deeper understanding of the relationships between the variables and identify any patterns or trends that may not be apparent through other methods. 
 
 <button class="btn btn-primary" data-toggle="collapse" data-target="#rCode3">Show/Hide R Code 3</button>
 <div id="rCode3" class="collapse">
@@ -305,6 +307,9 @@ perm_1 %>% as.data.frame() %>%
   kable_classic(lightable_options = 'hover') %>% 
   scroll_box(height = '100px')
 ```
+
+I conducted a permutation test using the adonis method to assess the association between the duration of sexual behavior in mice and their genetic code on the Pomc gene. The test was performed under a reduced model with mouse type as the explanatory variable. The permutation was set as free with 999 permutations, meaning that the observed data was randomly shuffled 999 times to obtain the distribution of test statistics. The results show that the variable mouse_type was a significant predictor of the duration of sexual behavior in these mice. The p-value and R-squared value will vary depending on the random shuffle of the data. Overall, the effect size is relatively large, as indicated by an R-squared value around 0.50387. This suggests that there is a significant difference in the duration of sexual behavior in mice based on their genetic code on the Pomc gene.
+
 #
 **MDS of behavior frequency**
 ```{r}
@@ -314,6 +319,7 @@ perm_2 %>% as.data.frame() %>%
   scroll_box(height = '100px')
 ```
 
+This permutation test was conducted using the same method as the test above. The results of the analysis showed a significant effect of mouse genetic code on the Pomc gene on the frequency of sexual behavior in mice. Overall, these findings suggest that the genetic code on the Pomc gene plays a significant role in frequency of sexual behavior in mice.
 
 # Visualizing MSD analysis 
 
