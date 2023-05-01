@@ -17,6 +17,7 @@ library(janitor)
 library(readxl)
 library(hms) 
 library(dplyr)
+library(vegan)
 theme_set(theme_minimal())
 
 ```
@@ -199,11 +200,25 @@ freq <- clean %>%
             appeared_successful_ejaculation = sum(behaviour == "appeared successful ejaculation"),
             mounting_attempt = sum(behaviour == "mounting attempts"))
 
+# SUMMARY STATS
+
+#calculate summary statistics of time by mouse_type and sex
+time_stats <- time %>%
+  group_by(mouse_type, sex) %>%
+  summarise(across(anogenital_sniffing:mounting_attempt, list(mean = mean, max = max, min = min)), .groups = 'drop')
+
+#calculate summary statistics of frequency by mouse_type and sex
+freq_stats <- freq %>%
+  group_by(mouse_type, sex) %>%
+  summarise(across(anogenital_sniffing:mounting_attempt, list(mean = mean, max = max, min = min)), .groups = 'drop')
+
+
+
 ```
 </div>
 #
 
-Below are the new data frames, respectively containing the total time and frequency of behaviors based on mouse ID number, mouse type and sex.
+Below are shown the new data frames, with the first two containing the total time and frequency of behaviors based on mouse ID number, mouse type, and sex. The third and fourth data frames display summary statistics for each behavior, including mean, maximum, and minimum values.These data frames enable us to better understand the behavioral patterns of mice based on their characteristics.
 
 **Total duration in Seconds of each Behavior**
 ```{r}
@@ -221,6 +236,117 @@ freq %>% as.data.frame() %>%
   scroll_box(height = '300px')
 
 ```
+#
+**Summary Stats Duration**
+```{r}
+time_stats %>% as.data.frame() %>% 
+  kableExtra::kable() %>% 
+  kable_classic(lightable_options = 'hover') %>% 
+  scroll_box(height = '170px')
+```
+#
+**Summary Stats Frequency**
+```{r}
+freq_stats %>% as.data.frame() %>% 
+  kableExtra::kable() %>% 
+  kable_classic(lightable_options = 'hover') %>% 
+  scroll_box(height = '170px')
+```
 
 
+# Working with MSD
 
+In the following code, the grouping variables in the time and frequency data frames are first removed, and then specific columns of data are selected and converted into matrices. The **adonis2()** function is then applied to the data to perform a permutation test to determine whether the groups differ significantly. The **metaMDS()** function is used to perform the MDS analysis on the matrices, and the resulting coordinates are used to create a scatter plot with **ggplot2**. The **stat_ellipse()** function is used to add an ellipse around the data points, which makes it visually easier to see the overlap between different mouse types.
+It is was important to utilize MSD analysis because it allows us to gain a deeper understanding of the relationships between the variables and identify any patterns or trends that may not be apparent through other methods. 
+
+<button class="btn btn-primary" data-toggle="collapse" data-target="#rCode3">Show/Hide R Code 3</button>
+<div id="rCode3" class="collapse">
+```{r echo=TRUE}
+# remove grouping variables from time data frame
+ungrouped_time <- time %>%
+  ungroup()
+
+# select columns and convert to matrix
+test_1 <- ungrouped_time %>%
+  select(-c(mouse_id_number, mouse_type, sex)) %>%
+  as.matrix()
+
+
+test_1 %>% head
+perm_1<- vegan::adonis2(formula = test_1 ~ mouse_type,time)
+
+Meta_1 <- vegan::metaMDS(test_1)
+
+# MDS of behavior frequency
+# remove grouping variables from time data frame
+ungrouped_freq <- freq %>%
+  ungroup()
+
+# select columns and convert to matrix
+test_2 <- ungrouped_freq %>%
+  select(-c(mouse_id_number, mouse_type, sex)) %>%
+  as.matrix()
+
+
+test_2 %>% head
+perm_2 <- vegan::adonis2(formula = test_2 ~ mouse_type,freq)
+
+Meta_2 <- vegan::metaMDS(test_2)
+
+# the data may not have enough variation to produce a valid ellipse
+
+```
+</div>
+#
+**MDS of behavior duration**
+```{r}
+perm_1 %>% as.data.frame() %>% 
+  kableExtra::kable() %>% 
+  kable_classic(lightable_options = 'hover') %>% 
+  scroll_box(height = '100px')
+```
+#
+**MDS of behavior frequency**
+```{r}
+perm_2 %>% as.data.frame() %>% 
+  kableExtra::kable() %>% 
+  kable_classic(lightable_options = 'hover') %>% 
+  scroll_box(height = '100px')
+```
+
+
+# Visualizing MSD analysis 
+
+mds1 and mds2 plots are two-dimensional visual representations of multidimensional scaling (MDS) analysis, where the distance between points in the plot reflects the similarity or dissimilarity between the corresponding data points. The mds1 plot shows the first dimension of the MDS analysis, while the mds2 plot shows the second dimension. These plots are useful for visualizing and comparing the similarity or dissimilarity patterns of data points.
+
+In our data, we can conclude that the genetic make-up of the Pomc gene in mice has an innmese effect on their sexual behavior. 
+
+#
+*Based on Duration*
+```{r}
+data.frame(
+  mds1=Meta_1$points[,1],
+  mds2=Meta_1$points[,2],
+  mouse_type=time$mouse_type,
+  sex=time$sex
+) %>% 
+  ggplot(aes(x=mds1,y=mds2,color=mouse_type)) +
+  geom_point() +
+  stat_ellipse() +
+  theme_minimal()
+```
+
+#
+*Based on Frequency*
+```{r}
+data.frame(
+  mds1=Meta_2$points[,1],
+  mds2=Meta_2$points[,2],
+  mouse_type=freq$mouse_type,
+  sex=freq$sex
+) %>% 
+  ggplot(aes(x=mds1,y=mds2,color=mouse_type)) +
+  geom_point() +
+  stat_ellipse() +
+  theme_minimal()
+```
