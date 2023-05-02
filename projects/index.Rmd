@@ -24,6 +24,7 @@ theme_set(theme_minimal())
 
 ## My Final Project 
 
+
 ### Data Analysis Course - Utah Valley University - Lauren Guerrero Silva
 ___
 
@@ -220,7 +221,7 @@ freq_stats <- freq %>%
 
 Below are shown the new data frames, with the first two containing the total time and frequency of behaviors based on mouse ID number, mouse type, and sex. The third and fourth data frames display summary statistics for each behavior, including mean, maximum, and minimum values.These data frames enable us to better understand the behavioral patterns of mice based on their characteristics.
 
-**Total duration in Seconds of each Behavior**
+**Total Duration in Seconds of each Behavior**
 ```{r}
 time %>% as.data.frame() %>% 
   kableExtra::kable() %>% 
@@ -256,10 +257,10 @@ freq_stats %>% as.data.frame() %>%
 
 ___
 
-# Working with MSD
+# Working with MDS
 
 In the following code, the grouping variables in the time and frequency data frames are first removed, and then specific columns of data are selected and converted into matrices. The **adonis2()** function is then applied to the data to perform a permutation test to determine whether the groups differ significantly. The **metaMDS()** function is used to perform the MDS analysis on the matrices, and the resulting coordinates are used to create a scatter plot with **ggplot2**. The **stat_ellipse()** function is used to add an ellipse around the data points, which makes it visually easier to see the overlap between different mouse types.
-It was important to utilize MSD analysis because it allows us to gain a deeper understanding of the relationships between the variables and identify any patterns or trends that may not be apparent through other methods. 
+It was important to utilize MDS analysis because it allows us to gain a deeper understanding of the relationships between the variables and identify any patterns or trends that may not be apparent through other methods. 
 
 <button class="btn btn-primary" data-toggle="collapse" data-target="#rCode3">Show/Hide R Code 3</button>
 <div id="rCode3" class="collapse">
@@ -321,7 +322,7 @@ perm_2 %>% as.data.frame() %>%
 
 This permutation test was conducted using the same method as the test above. The results of the analysis showed a significant effect of mouse genetic code on the Pomc gene on the frequency of sexual behavior in mice. Overall, these findings suggest that the genetic code on the Pomc gene plays a significant role in frequency of sexual behavior in mice.
 
-# Visualizing MSD analysis 
+# Visualizing MDS analysis 
 
 mds1 and mds2 plots are two-dimensional visual representations of multidimensional scaling (MDS) analysis, where the distance between points in the plot reflects the similarity or dissimilarity between the corresponding data points. The mds1 plot shows the first dimension of the MDS analysis, while the mds2 plot shows the second dimension. These plots are useful for visualizing and comparing the similarity or dissimilarity patterns of data points.
 
@@ -356,3 +357,4 @@ data.frame(
   stat_ellipse() +
   theme_minimal()
 ```
+
