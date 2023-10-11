@@ -6,7 +6,7 @@ knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE)
 ```
 
 
-### Hi, my name is Lauren Guerrero Silva. 
+### Hi, my name is Lauren Silvatti 
 I was born and raised in Barranquilla, Colombia. After graduating high school in 2014, my mother decided that moving to the USA was the best thing she could do for my little brother and me. Though I left my country from a relatively young age, my love for Colombia runs deep. Colombia is a land of immense beauty, with a rich culture and biodiversity that is unparalleled. Our culture is a unique blend of indigenous, African, and Spanish influences, which can be seen in everything from our music and dance to our food and art. My roots are a big part of me and I am very proud of my ascendance. 
 
 ```{r,out.length=500,out.width=400}
