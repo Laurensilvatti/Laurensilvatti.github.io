@@ -27,8 +27,8 @@ knitr::include_graphics("../media/853a6825-2e55-4941-81a5-fe4f90d0a0b5.jpg")
 Aside from my academic pursuits, I have a passion for traveling and have been fortunate enough to visit many countries. My goal is to visit all, or at least most, of the countries in the world by the time I turn 40. There is something truly magical about exploring new cultures, meeting new people, and discovering new places. For me, traveling is not just a hobby or a way to escape from everyday life, but it is a way to broaden my horizons and gain a deeper understanding of the world.
 
 ```{r,out.length=500,out.width=400}
-knitr::include_graphics("../media/IMG_3179.jpeg")
+knitr::include_graphics("../media/IMG_3649.jpeg")
 ```
 
-Last but not least, meet my wife Magnolia. The love of my life and the reason I have come to be the person I am. Having her by my side has made all of life's challenges and adventures even more meaningful. Whether it's traveling the world, pursuing my academic and professional goals, or simply navigating the ups and downs of everyday life, having someone who supports and encourages my crazy mind can make all the difference.
+Last but not least, My wife. The love of my life and the reason I have come to be the person I am. Having her by my side has made all of life's challenges and adventures even more meaningful. Whether it's traveling the world, pursuing my academic and professional goals, or simply navigating the ups and downs of everyday life, having someone who supports and encourages my crazy mind can make all the difference.
 
