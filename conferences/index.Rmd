@@ -1,5 +1,6 @@
 ---
 output: html_document
+pagetitle: Conferences
 ---
 
 ```{r setup, include=FALSE}
