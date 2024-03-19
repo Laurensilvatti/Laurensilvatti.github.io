@@ -1,0 +1,359 @@
+---
+output: 
+  html_document:
+    toc: yes
+    toc_float:
+      collapsed: false
+pagetitle: MyReportOnMiceBehavior
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE)
+library(tidyverse)
+library(easystats)
+library(kableExtra)
+library(janitor)
+library(readxl)
+library(hms) 
+library(dplyr)
+library(vegan)
+theme_set(theme_minimal())
+
+```
+
+## My Final Project 
+
+
+### Utah Valley University - Lauren Silvatti
+___
+
+I am currently working with mice to determine whether or not their Pomc mutation has any effect
+on their sexual behavior.
+Proopiomelanocortin (Pomc) is a polypeptide found primarily in the arcuate nucleus (ARC) of the hypothalamus. 
+The Pomc-allele synthesizes several products. The combination of resultant peptides makes Pomc a powerful influence
+on overall health, particularly in relation to body size and fertility. A mutation at the nPE1 site of the Pomc 
+gene results in a 70% deficiency of Pomc expression. In humans, this translates to extreme hyperphagia, early 
+onset (and extreme) obesity, hypercortisolism, light skin, and red hair pigmentation.
+Many of these effects are apparent on a mouse model. The goal is to create a mouse model that helps in determining
+the cause for the observed infertility experienced by Pomc-deficient individuals, specifically evaluating the differences 
+between wild-type (control) mice and affected POMC-deficient (mutant) mice in sexual behavior: libido, 
+adherance to copulatory norms, and ultrasonic communication.
+
+Here is a look at the raw data I worked with.
+
+# Raw Data
+
+
+```{r}
+df <- read_excel("../media/trial_edited.xlsx") %>% 
+  clean_names()
+
+df %>% 
+  kable() %>% 
+  kable_classic(lightable_options = 'hover') %>% 
+  scroll_box(height = '200px')
+```
+
+
+#
+The present data set includes information on male and female mice, comprising their respective genetic make-up (homozygous, heterozygous, or wild-type) and the duration of specific sexual behaviors exhibited over a 30 minute time interval. This research objectives encompass the comprehensive analysis of this data set to ascertain whether significant differences in sexual behavior among mice can be attributed to their genetic makeup.
+
+___
+
+# Cleaning
+
+
+Prior to commencing a comprehensive analysis of the data, several data tidying tasks need to be performed.
+
+<button class="btn btn-primary" data-toggle="collapse" data-target="#rCode1">Show/Hide R Code 1</button>
+<div id="rCode1" class="collapse">
+```{r echo=TRUE}
+df$behaviour <- 
+  df$behaviour %>% tolower()
+
+clean <-  df %>% 
+  separate(col=timestamps,
+           into= c("start_time","end_time"),
+           sep = "-",      #not necessary to type in this case, but this is how is done.
+           convert = TRUE) #converted characters to integers.
+
+clean$start_time <- 
+  clean$start_time %>% 
+  as_hms()
+
+clean$end_time <- 
+  clean$end_time %>% 
+  as_hms()
+
+clean$start_time %>% class()
+
+clean <- 
+  clean %>% 
+  mutate(duration_in_s = (end_time - start_time) %>% 
+           as_hms())
+
+#Separating Sex, Mouse Type, Mouse ID
+clean$sex <-  clean$mouse_id %>%  
+  str_sub(1,1)
+
+clean$mouse_type <- clean$mouse_id %>% 
+  str_sub(2,3)
+
+clean$mouse_id_number <- ifelse(clean$mouse_id %>%  nchar == 6,
+                             clean$mouse_id %>% str_sub(4,6),
+                             clean$mouse_id %>% str_sub(5,7))
+
+# Modifying mouse type to be more readable.
+clean <- clean %>% 
+  mutate(mouse_type = case_when(mouse_type == "WT" ~ "Wild type",     
+                           mouse_type == "HE" ~ "Heterozigot",
+                           mouse_type == "HO" ~ "Homozigot")) 
+
+# Reorganize columns in a more readable way.
+colnames(clean)
+clean <- clean[, c("trial_number", "mouse_id_number", "mouse_type",
+             "sex", "date", "start_time", "end_time",
+             "duration_in_s", "behaviour")]
+
+```
+</div>
+
+#
+The previous R code is part of the data cleaning process. The *df* dataframe, which contains the original data, is first modified by converting all behavior values to lowercase. Then, the *timestamps* column is separated into *start_time* and *end_time* columns, which are subsequently converted from characters to time objects using the **as_hms()** function. A new *duration_in_s* column is created by calculating the difference in seconds between the *start_time* and *end_time* columns.
+
+Next, the *mouse_id* column is separated into *sex*, *mouse_type*, and *mouse_id_number* columns using the **str_sub()** function. The *mouse_type* values are modified to be more readable, with "WT" representing "Wild type", "HE" representing "Heterozigot", and "HO" representing "Homozigot". Finally, the columns are reordered for better readability.
+
+___ 
+
+
+# Cleaned Data
+
+The resulting clean dataframe will now be presented in a tabular format using the **kableExtra::kable()** function as done with the original data. This chart shows the *trial number*, *mouse ID number*, *mouse type*, *sex*, *date*, *start time*, *end time*, *duration in seconds*, and *behavior*. The table reveals that female mice did not exhibit mounting behavior, which is expected due to their biological differences from male mice.
+
+```{r}
+clean %>% as.data.frame() %>% 
+  kableExtra::kable() %>% 
+  kable_classic(lightable_options = 'hover') %>% 
+  scroll_box(height = '300px')
+
+```
+
+___
+
+# Visualizing the Data
+
+Adding a visual representation of our data frame can be helpful to understand the patterns and relationships within the data more easily. It can also help us identify outliers, trends, and other important features of the data that may not be immediately apparent when looking at the raw numbers.
+This plot shows the duration of behaviors exhibited by male and female mice of different genetic types. The behaviors were filtered to include only those with a duration of less than two minutes to exclude a few outliers found in the dataframe.  The plot shows the distribution of duration in seconds for each behavior using box plots, with the behavior on the x-axis and the duration on the y-axis. The plot is further divided into subplots based on the genetic type of the mice, with the y-axis scales varying between the subplots. The plot suggests that there are differences in the duration of certain behaviors between male and female mice of different genetic types.
+
+```{r}
+clean %>% 
+  filter(between(duration_in_s, as.hms("00:00:00"), as.hms("00:02:00"))) %>% 
+  ggplot(aes(x=behaviour,y=duration_in_s, fill=sex)) +
+  geom_boxplot() +
+  facet_wrap(~mouse_type, scales = 'free_y') +
+  labs(y="Duration",x="Behavior",title = "Durantion of behavior")+
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 90, vjust = .5))
+
+```
+
+The preceding graph indicates that wild-type male and female mice exhibited a greater frequency of sexual behaviors, while heterozygous and homozygous mice primarily engaged in anogenital sniffing across multiple trials.
+
+___
+
+# Multidimentional Scaling
+
+In order to fully utilize the information in our data set, it becomes necessary to shift gears from traditional linear models to exploratory data analysis techniques that can handle multiple variables. One such technique is dimension reduction, which allows us to identify the most important variables while also reducing the complexity of our data set. In this context, we will be using the metaMDS (multidimensional scaling) ANOVA analysis, which is a powerful and widely-used method that provides a low-dimensional representation of our high-dimensional data set. This analysis is particularly important for our research because it enables us to identify the most important variables that contribute to the variation in our data and to identify patterns and trends that may not be immediately apparent using traditional linear models. Ultimately, this type of analysis can help us gain a deeper understanding of the complex relationships among the variables in our data set, and can provide important insights for further research and analysis.
+
+To begin this process I will create two different data frames. The first data frame will focus on the duration of each behavior by sex and mouse type, while the second data frame will provide information on the frequency of each behavior. This approach will enable us to identify any underlying patterns or trends in our data and facilitate further statistical analyses.
+
+#
+<button class="btn btn-primary" data-toggle="collapse" data-target="#rCode2">Show/Hide R Code 2</button>
+<div id="rCode2" class="collapse">
+```{r echo=TRUE}
+#1. Columns of Mouse type, sex, behavior (each beh get a column) and total time of behavior.
+time <- clean %>%
+  mutate(start_time = as.POSIXct(paste(date, start_time)),
+         end_time = as.POSIXct(paste(date, end_time))) %>%
+  group_by(mouse_id_number, mouse_type, sex) %>%
+  summarize(anogenital_sniffing = sum(difftime(end_time[behaviour == "anogenital sniffing"], 
+                                               start_time[behaviour == "anogenital sniffing"])),
+            pelvic_thrusting = sum(difftime(end_time[behaviour == "pelvic thrusting"], 
+                                            start_time[behaviour == "pelvic thrusting"])),
+            post_intromission_grooming = sum(difftime(end_time[behaviour == "post intromission grooming"], 
+                                                      start_time[behaviour == "post intromission grooming"])),
+            appeared_successful_ejaculation = sum(difftime(end_time[behaviour == "appeared successful ejaculation"], 
+                                                           start_time[behaviour == "appeared successful ejaculation"])),
+            mounting_attempt = sum(difftime(end_time[behaviour == "mounting attempts"], 
+                                            start_time[behaviour == "mounting attempts"])))
+
+time <- time %>% 
+  mutate_at(vars(4:8), ~ as.numeric(gsub(" secs", "", .)))
+
+
+#2. Columns of Mouse Type, Sex, Behavior (each beh get a column) and Frequency of behavior. 
+freq <- clean %>%
+  group_by(mouse_id_number, mouse_type, sex) %>%
+  summarize(anogenital_sniffing = sum(behaviour == "anogenital sniffing"),
+            pelvic_thrusting = sum(behaviour == "pelvic thrusting"),
+            post_intromission_grooming = sum(behaviour == "post intromission grooming"),
+            appeared_successful_ejaculation = sum(behaviour == "appeared successful ejaculation"),
+            mounting_attempt = sum(behaviour == "mounting attempts"))
+
+# SUMMARY STATS
+
+#calculate summary statistics of time by mouse_type and sex
+time_stats <- time %>%
+  group_by(mouse_type, sex) %>%
+  summarise(across(anogenital_sniffing:mounting_attempt, list(mean = mean, max = max, min = min)), .groups = 'drop')
+
+#calculate summary statistics of frequency by mouse_type and sex
+freq_stats <- freq %>%
+  group_by(mouse_type, sex) %>%
+  summarise(across(anogenital_sniffing:mounting_attempt, list(mean = mean, max = max, min = min)), .groups = 'drop')
+
+
+
+```
+</div>
+#
+
+Below are shown the new data frames, with the first two containing the total time and frequency of behaviors based on mouse ID number, mouse type, and sex. The third and fourth data frames display summary statistics for each behavior, including mean, maximum, and minimum values.These data frames enable us to better understand the behavioral patterns of mice based on their characteristics.
+
+**Total Duration in Seconds of each Behavior**
+```{r}
+time %>% as.data.frame() %>% 
+  kableExtra::kable() %>% 
+  kable_classic(lightable_options = 'hover') %>% 
+  scroll_box(height = '300px')
+```
+#
+**Total Frequency of each Behavior**
+```{r}
+freq %>% as.data.frame() %>% 
+  kableExtra::kable() %>% 
+  kable_classic(lightable_options = 'hover') %>% 
+  scroll_box(height = '300px')
+
+```
+#
+**Summary Stats Duration**
+```{r}
+time_stats %>% as.data.frame() %>% 
+  kableExtra::kable() %>% 
+  kable_classic(lightable_options = 'hover') %>% 
+  scroll_box(height = '170px')
+```
+#
+**Summary Stats Frequency**
+```{r}
+freq_stats %>% as.data.frame() %>% 
+  kableExtra::kable() %>% 
+  kable_classic(lightable_options = 'hover') %>% 
+  scroll_box(height = '170px')
+```
+
+
+___
+
+# Working with MDS
+
+In the following code, the grouping variables in the time and frequency data frames are first removed, and then specific columns of data are selected and converted into matrices. The **adonis2()** function is then applied to the data to perform a permutation test to determine whether the groups differ significantly. The **metaMDS()** function is used to perform the MDS analysis on the matrices, and the resulting coordinates are used to create a scatter plot with **ggplot2**. The **stat_ellipse()** function is used to add an ellipse around the data points, which makes it visually easier to see the overlap between different mouse types.
+It was important to utilize MDS analysis because it allows us to gain a deeper understanding of the relationships between the variables and identify any patterns or trends that may not be apparent through other methods. 
+
+<button class="btn btn-primary" data-toggle="collapse" data-target="#rCode3">Show/Hide R Code 3</button>
+<div id="rCode3" class="collapse">
+```{r echo=TRUE}
+# remove grouping variables from time data frame
+ungrouped_time <- time %>%
+  ungroup()
+
+# select columns and convert to matrix
+test_1 <- ungrouped_time %>%
+  select(-c(mouse_id_number, mouse_type, sex)) %>%
+  as.matrix()
+
+
+test_1 %>% head
+perm_1<- vegan::adonis2(formula = test_1 ~ mouse_type,time)
+
+Meta_1 <- vegan::metaMDS(test_1)
+
+# MDS of behavior frequency
+# remove grouping variables from time data frame
+ungrouped_freq <- freq %>%
+  ungroup()
+
+# select columns and convert to matrix
+test_2 <- ungrouped_freq %>%
+  select(-c(mouse_id_number, mouse_type, sex)) %>%
+  as.matrix()
+
+
+test_2 %>% head
+perm_2 <- vegan::adonis2(formula = test_2 ~ mouse_type,freq)
+
+Meta_2 <- vegan::metaMDS(test_2)
+
+# the data may not have enough variation to produce a valid ellipse
+
+```
+</div>
+#
+**MDS of behavior duration**
+```{r}
+perm_1 %>% as.data.frame() %>% 
+  kableExtra::kable() %>% 
+  kable_classic(lightable_options = 'hover') %>% 
+  scroll_box(height = '100px')
+```
+
+I conducted a permutation test using the adonis method to assess the association between the duration of sexual behavior in mice and their genetic code on the Pomc gene. The test was performed under a reduced model with mouse type as the explanatory variable. The permutation was set as free with 999 permutations, meaning that the observed data was randomly shuffled 999 times to obtain the distribution of test statistics. The results show that the variable mouse_type was a significant predictor of the duration of sexual behavior in these mice. The p-value and R-squared value will vary depending on the random shuffle of the data. Overall, the effect size is relatively large, as indicated by an R-squared value around 0.50387. This suggests that there is a significant difference in the duration of sexual behavior in mice based on their genetic code on the Pomc gene.
+
+#
+**MDS of behavior frequency**
+```{r}
+perm_2 %>% as.data.frame() %>% 
+  kableExtra::kable() %>% 
+  kable_classic(lightable_options = 'hover') %>% 
+  scroll_box(height = '100px')
+```
+
+This permutation test was conducted using the same method as the test above. The results of the analysis showed a significant effect of mouse genetic code on the Pomc gene on the frequency of sexual behavior in mice. Overall, these findings suggest that the genetic code on the Pomc gene plays a significant role in frequency of sexual behavior in mice.
+
+# Visualizing MDS analysis 
+
+mds1 and mds2 plots are two-dimensional visual representations of multidimensional scaling (MDS) analysis, where the distance between points in the plot reflects the similarity or dissimilarity between the corresponding data points. The mds1 plot shows the first dimension of the MDS analysis, while the mds2 plot shows the second dimension. These plots are useful for visualizing and comparing the similarity or dissimilarity patterns of data points.
+
+In our data, we can conclude that the genetic make-up of the Pomc gene in mice has an innmese effect on their sexual behavior. 
+
+#
+*Based on Duration*
+```{r}
+data.frame(
+  mds1=Meta_1$points[,1],
+  mds2=Meta_1$points[,2],
+  mouse_type=time$mouse_type,
+  sex=time$sex
+) %>% 
+  ggplot(aes(x=mds1,y=mds2,color=mouse_type)) +
+  geom_point() +
+  stat_ellipse() +
+  theme_minimal()
+```
+
+#
+*Based on Frequency*
+```{r}
+data.frame(
+  mds1=Meta_2$points[,1],
+  mds2=Meta_2$points[,2],
+  mouse_type=freq$mouse_type,
+  sex=freq$sex
+) %>% 
+  ggplot(aes(x=mds1,y=mds2,color=mouse_type)) +
+  geom_point() +
+  stat_ellipse() +
+  theme_minimal()
+```
