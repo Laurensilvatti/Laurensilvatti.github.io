@@ -20,7 +20,7 @@ Despite these challenges, I am proud to say that my hard work has paid off. I wa
 Currently, I am conducting research in the neuroscience department and am eager to continue learning and expanding my knowledge. 
 
 ```{r,out.length=500,out.width=400}
-knitr::include_graphics("../media/853a6825-2e55-4941-81a5-fe4f90d0a0b5.jpg")
+knitr::include_graphics("../media/FA06522A-A7E6-4436-AFB3-41181E91DADE_1_201_a.jpg")
 ```
 
 

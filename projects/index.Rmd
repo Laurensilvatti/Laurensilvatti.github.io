@@ -4,7 +4,7 @@ output:
     toc: yes
     toc_float:
       collapsed: false
-pagetitle: MyAnalysisOnMicebehaviour
+pagetitle: MyAnalysisOnMiceBehaviour
 ---
 
 

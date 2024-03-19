@@ -12,7 +12,7 @@ knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE)
 
 This is the online space where you can get to know me, my work, and my passions. I am thrilled that you are here and hope that you will find this website informative.
 
-## [About Me](https://laurensilvatti.github.io/about_me/)  | [Curriculum Vitae](https://laurensilvatti.github.io/CV/) | [Projects](https://laurensilvatti.github.io/projects/) | [Conferences](https://laurensilvatti.github.io/conferences/)
+## [About Me](https://laurensilvatti.github.io/about_me/)  | [Curriculum Vitae](http://Laurensilvatti.github.io/media/Lauren_CV.pdf) | [Projects](https://laurensilvatti.github.io/projects/) | [Conferences](https://laurensilvatti.github.io/conferences/)
 
 As a woman who is passionate about science and traveling I am excited to share my journey with you. Through this website, I hope to provide insights into my background, skills, and achievements, as well as highlight some of the projects and experiences that have shaped my career.
 
